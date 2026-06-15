@@ -1,0 +1,7 @@
+# Task 6 — Visual Automation
+# Install: pip install -r requirements.txt
+
+selenium>=4.18.1          # browser automation
+Pillow>=10.2.0            # image loading and manipulation
+numpy>=1.24.4             # vectorised pixel diff
+webdriver-manager>=4.0.1  # auto-manages ChromeDriver / GeckoDriver binaries
