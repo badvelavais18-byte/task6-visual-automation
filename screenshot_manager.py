@@ -10,6 +10,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
+import undetected_chromedriver as uc
 
 from config import DIRS, SLEEP, BROWSER, HEADLESS, IMPLICIT_WAIT, PAGE_LOAD_TMO
 
@@ -21,11 +22,9 @@ from config import DIRS, SLEEP, BROWSER, HEADLESS, IMPLICIT_WAIT, PAGE_LOAD_TMO
 def create_driver(browser: str = BROWSER, headless: bool = HEADLESS) -> webdriver.Remote:
     """
     Create and return a configured WebDriver instance.
-
-    Supports Chrome and Firefox; Selenium 4.6+ handles driver binary discovery
-    automatically via Selenium Manager — no manual chromedriver install needed.
+    Uses undetected_chromedriver to bypass Cloudflare bot detection.
     """
-    time.sleep(SLEEP["startup"])          # ✅ SLEEP: wait before browser launch
+    time.sleep(SLEEP["startup"])          # SLEEP: wait before browser launch
 
     if browser == "chrome":
         opts = ChromeOptions()
@@ -36,10 +35,8 @@ def create_driver(browser: str = BROWSER, headless: bool = HEADLESS) -> webdrive
         opts.add_argument("--disable-gpu")
         opts.add_argument("--disable-extensions")
         opts.add_argument("--disable-blink-features=AutomationControlled")
-        opts.add_experimental_option("excludeSwitches", ["enable-automation"])
-        opts.add_experimental_option("useAutomationExtension", False)
         opts.add_argument("--window-size=1920,1080")
-        driver = webdriver.Chrome(options=opts)
+        driver = uc.Chrome(options=opts)
 
     elif browser == "firefox":
         opts = FirefoxOptions()
@@ -62,19 +59,39 @@ def create_driver(browser: str = BROWSER, headless: bool = HEADLESS) -> webdrive
 def navigate(driver: webdriver.Remote, url: str) -> None:
     """Navigate to a URL and wait for the page to fully render."""
     driver.get(url)
-    time.sleep(SLEEP["page_load"])        # ✅ SLEEP: full page render
+    time.sleep(SLEEP["page_load"])        # SLEEP: full page render
+    try:
+        driver.execute_script("""
+            var els = document.querySelectorAll(".carousel, [data-ride], .slider, .owl-carousel");
+            els.forEach(function(el){ el.style.animationPlayState="paused"; });
+            var btns = document.querySelectorAll(".carousel-indicators button, .owl-dot");
+            if(btns.length > 0){ btns[0].click(); }
+        """)
+    except Exception:
+        pass
+    time.sleep(0.5)
+    driver.execute_script("window.scrollTo(0, 600);")
+    time.sleep(SLEEP["after_scroll"])
 
 
 def resize(driver: webdriver.Remote, width: int, height: int) -> None:
     """Resize the browser window and wait for CSS layout reflow."""
-    driver.set_window_size(width, height)
-    time.sleep(SLEEP["after_resize"])     # ✅ SLEEP: layout / CSS reflow
+    try:
+        driver.set_window_rect(0, 0, width, height)
+    except Exception:
+        try:
+            driver.execute_script(
+                f"window.moveTo(0,0); window.resizeTo({width},{height});"
+            )
+        except Exception:
+            pass
+    time.sleep(SLEEP["after_resize"])     # SLEEP: layout / CSS reflow
 
 
 def scroll_to_top(driver: webdriver.Remote) -> None:
     """Scroll the viewport to the page top and wait for animation."""
     driver.execute_script("window.scrollTo(0, 0);")
-    time.sleep(SLEEP["after_scroll"])     # ✅ SLEEP: scroll animation settle
+    time.sleep(SLEEP["after_scroll"])     # SLEEP: scroll animation settle
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -108,6 +125,6 @@ def capture(
     filepath = os.path.join(DIRS[dest], filename)
 
     driver.save_screenshot(filepath)
-    time.sleep(SLEEP["after_capture"])    # ✅ SLEEP: I/O and post-capture settle
+    time.sleep(SLEEP["after_capture"])    # SLEEP: I/O and post-capture settle
 
     return filepath

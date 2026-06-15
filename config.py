@@ -28,9 +28,9 @@ VIEWPORTS = [
 
 # ─── Target Pages ─────────────────────────────────────────────────────────────
 PAGES = [
-    {"id": "home",   "url": "https://demo.opencart.com/"},
-    {"id": "search", "url": "https://demo.opencart.com/index.php?route=product/search&search=camera"},
-    {"id": "login",  "url": "https://demo.opencart.com/index.php?route=account/login"},
+    {"id": "home",      "url": "https://books.toscrape.com/"},
+    {"id": "catalogue", "url": "https://books.toscrape.com/catalogue/page-1.html"},
+    {"id": "mystery",   "url": "https://books.toscrape.com/catalogue/category/books/mystery_3/index.html"},
 ]
 
 # ─── Visual Diff Settings ─────────────────────────────────────────────────────

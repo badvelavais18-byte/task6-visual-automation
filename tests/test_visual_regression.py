@@ -358,7 +358,7 @@ class TestVisualRegression(unittest.TestCase):
         actual_path   = capture(self.driver, "login", "form_integrity_1280", dest="actual")
         time.sleep(SLEEP["after_capture"])        # ✅ SLEEP
 
-        baseline_path = os.path.join(DIRS["baselines"], "login__laptop_1280.png")
+        baseline_path = os.path.join(DIRS["baselines"], "mystery__laptop_1280.png")
         if not os.path.exists(baseline_path):
             self.skipTest("Baseline not found — run TestBaselineCapture first")
 
@@ -388,7 +388,7 @@ class TestVisualRegression(unittest.TestCase):
         actual_path   = capture(self.driver, "search", "grid_tablet_768", dest="actual")
         time.sleep(SLEEP["after_capture"])        # ✅ SLEEP
 
-        baseline_path = os.path.join(DIRS["baselines"], "search__tablet_768.png")
+        baseline_path = os.path.join(DIRS["baselines"], "catalogue__tablet_768.png")
         if not os.path.exists(baseline_path):
             self.skipTest("Baseline not found — run TestBaselineCapture first")
 
